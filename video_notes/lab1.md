@@ -65,8 +65,8 @@ EIP = 0000FFF0H，CS = F000H
  - 全局描述符表（GDT），由bootloader建立，描述好空间和大小，由命令lgdt，建立好GDT。由GDTR保存GDT入口地址和表长信息。 
  - 段选择子：高13位GDT Index，TI表示是LDT还是GDT，之后RPL两个bit表示四个特权级
 
-- 使能保护模式
+- 使能保护模式 
   将CR0设置某一位为0（PE）
 
-- 加载ELF格式的uCore OS kernel
+- 加载ELF格式的uCore OS kernel 
   从ELF header中获得proghdr位置，读出虚存地址va，找到起始位置和大小，用来在内存中存放uCore的代码段和数据段。由于无文件系统，直接将扇区读入。
