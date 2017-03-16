@@ -69,3 +69,41 @@ EIP = 0000FFF0H，CS = F000H
 
 - 加载ELF格式的uCore OS kernel 
   从ELF header中获得proghdr位置，读出虚存地址va，找到起始位置和大小，用来在内存中存放uCore的代码段和数据段。由于无文件系统，直接将扇区读入。
+
+# C函数调用实现 
+[Understanding the Stack](http://www.cs.umd.edu/class/spring2003/cmsc311/Notes/Mips/stack.html)
+- 参数和函数返回值可通过寄存器或内存中的栈来传递。
+- 不需要保存/恢复所有寄存器
+
+# GCC内联汇编
+C语言不足以完成所有的CPU指令，同时使用汇编进行手动优化。
+```
+asm( assembler template
+:output operands
+:input operands
+:clobbers
+);
+```
+# x86中断处理
+完成被打断的程序的保存和恢复
+- 中断：
+	- 外设产生终端
+	- 软件产生软中断：The INT n指令，通常用于系统调用
+- 异常
+	- 程序错误
+	- 软件产生的异常：INTO，INT 3 and BOUND
+	- 机器检查出的异常：S
+- 确定中断服务例程
+	- 每个中断或异常与一个中断服务例程（ISR）相关联，储存在中断描述符表中
+	- IDT的起始地址和大小保存在中断描述符表寄存器IDTR中
+	- 中断门对应一个中断号，找到对应GDT中保存的的段选择子，加上偏移后，得到中断服务例程的地址。
+	- IDT由操作系统建立，将起始地址由特定命令交给CPU。
+- 切换到中断服务例程
+	- 段描述符中会保持特权级
+	- 无特权级变化：仍然在相同栈中，将Error Code、EIP、CS、EFLAGS压栈
+	- 有特权级变化：在不同的栈中，由于特权级变化，额外压入SS和ESP（产生中断时用户态中的地址）
+- 返回（iret）：
+	- iret：将EFLAGS和SS/ESP弹出（根据特权级变化决定）
+	- ret弹出EIP，retf弹出CS和EIP
+- 系统调用
+	- 用户通过系统调用访问OS内核服务
